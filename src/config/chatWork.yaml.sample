@@ -1,0 +1,5 @@
+  apiKey: XXX
+  baseUrl: https://api.chatwork.com/v2/rooms
+  myChat:
+    roomId: XXX
+    endPoint: XXX
