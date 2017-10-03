@@ -4,7 +4,7 @@ namespace app;
 // ChatWorkのAPIを叩くクラス
 class ChatWork
 {
-    const LOG_FILE_PATH = __DIR__ . "/chatWork.log";
+    const LOG_FILE_PATH =  __DIR__ . "/../log/chatWork.log";
     /**
      * $roomNameに設定されているチャットに$contentsを投稿する
      *
