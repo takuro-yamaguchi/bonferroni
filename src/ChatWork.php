@@ -48,7 +48,6 @@ class ChatWork
         $ch = curl_init();
         curl_setopt_array($ch, $options);
         $res = curl_exec($ch);
-        var_dump($res);
         curl_close($ch);
 
         // エラー判定

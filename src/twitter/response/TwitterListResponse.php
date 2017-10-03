@@ -1,6 +1,6 @@
 <?php
 
-namespace app\twitter;
+namespace app\twitter\response;
 
 /**
  * Class TwitterListResponse
@@ -77,6 +77,20 @@ class TwitterListResponse
     public function isNextResults()
     {
         return !empty($this->searchMetadata) && !empty($this->searchMetadata->getNextResults());
+    }
+
+    /**
+     * ChatWork投稿用テキスト生成
+     * @return string $text
+     */
+    public function createChatWorkText()
+    {
+        $text = '';
+        foreach ($this->getTweetList() as $tweet) {
+            $text .= $tweet->createChatWorkText();
+        }
+
+        return $text;
     }
 
     /**

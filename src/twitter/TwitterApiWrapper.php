@@ -2,12 +2,15 @@
 
 namespace app\twitter;
 
+use app\twitter\response\TwitterListResponse;
+
 /**
  * Class TwitterApiWrapper
  * @package app
  */
 class TwitterApiWrapper
 {
+    /** @var \Abraham\TwitterOAuth\TwitterOAuth|null  */
     private $_connection = null;
 
     const DEFAULT_GET_TWEET_COUNT = 100;
@@ -28,9 +31,9 @@ class TwitterApiWrapper
      *
      * @param $query
      * @param $sinceDateTime
-     * @return Tweet[]
+     * @return TwitterListResponse
      */
-    public function search($query, $sinceDateTime = null)
+    public function searchTweets($query, $sinceDateTime = null)
     {
         $params = array(
             "q"     => $query,
@@ -40,7 +43,7 @@ class TwitterApiWrapper
 
         $apiResult = $this->exec("search/tweets", $params, true);
 
-        return $apiResult->getTweetList();
+        return $apiResult;
     }
 
     /**
@@ -63,22 +66,6 @@ class TwitterApiWrapper
         $apiResult = TwitterListResponse::mergeResult($apiResult, $result);
 
         return $apiResult;
-    }
-
-    /**
-     * ChatWork投稿用テキスト生成
-     *
-     * @param Tweet[] $tweetList
-     * @return string $text
-     */
-    public static function createChatWorkText($tweetList)
-    {
-        $text = '';
-        foreach ($tweetList as $tweet) {
-            $text .= $tweet->createChatWorkText();
-        }
-
-        return $text;
     }
 
     /**

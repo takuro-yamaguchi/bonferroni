@@ -1,6 +1,6 @@
 <?php
 
-namespace app\twitter;
+namespace app\twitter\response;
 
 /**
  * Class Tweet
@@ -36,10 +36,6 @@ class Tweet
     public $inReplyToStatusId;
     /** @var  string 上記の文字列版 */
     public $inReplyToStatusIdStr;
-
-    // 以下、追加プロパティ
-    public $originTweetUrl;
-    public $onlyRetweet;
 
     private $setFlag = false;
 
