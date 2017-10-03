@@ -53,7 +53,7 @@ class TwitterApiWrapper
     {
         $apiResult = new TwitterListResponse($this->_connection->get($endPoint, $params));
 
-        if (!$isRecursionGet || $apiResult->isNextResults()) {
+        if (!$isRecursionGet || !$apiResult->isNextResults()) {
             return $apiResult;
         }
 

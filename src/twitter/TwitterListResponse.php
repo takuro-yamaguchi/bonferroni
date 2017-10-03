@@ -19,7 +19,7 @@ class TwitterListResponse
     public function __construct($responseObj)
     {
         $this->statuses       = $responseObj->statuses ?? null;
-        $this->searchMetadata = new SearchMetadata($responseObj->search_metadata);
+        $this->searchMetadata = !empty($responseObj->search_metadata) ? new SearchMetadata($responseObj->search_metadata) : null;
     }
 
     public function getStatuses()
@@ -60,6 +60,8 @@ class TwitterListResponse
      */
     public function getNextApiParams()
     {
+        if (empty($this->searchMetadata)) return array();
+
         // queryを解析し、パラメータを作成
         parse_str(
             preg_replace('/^\?/', '', $this->searchMetadata->getNextResults()),
@@ -74,7 +76,7 @@ class TwitterListResponse
      */
     public function isNextResults()
     {
-        return !empty($this->searchMetadata->getNextResults());
+        return !empty($this->searchMetadata) && !empty($this->searchMetadata->getNextResults());
     }
 
     /**

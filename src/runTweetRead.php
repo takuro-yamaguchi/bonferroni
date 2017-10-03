@@ -15,10 +15,12 @@ $twitterWrapper = new \app\twitter\TwitterApiWrapper(
 
 $result = $twitterWrapper->search(
     "battlefes OR バトフェス OR バトルフェスティバル exclude:retweets",
-    date("Y-m-d H:i:s", strtotime("- 5 minite"))
+    date("Y-m-d H:i:s", strtotime("- 5 minitue"))
 );
 
 $a = \app\ChatWork::post('test', \app\twitter\TwitterApiWrapper::createChatWorkText($result));
-print_r($a);
+if(isset($a)) {
+    print_r($a);
+}
 
 
