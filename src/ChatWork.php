@@ -38,12 +38,14 @@ class ChatWork
             CURLOPT_SSL_VERIFYPEER => false, // 証明書の検証をしない
             CURLOPT_POST       => true, // POST設定
             CURLOPT_POSTFIELDS => http_build_query($params, '', '&'), // POST内容
+            CURLOPT_HEADER => true
         );
 
         // APIを叩く
         $ch = curl_init();
         curl_setopt_array($ch, $options);
         $res = curl_exec($ch);
+        var_dump($res);
         curl_close($ch);
 
         // エラー判定

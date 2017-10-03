@@ -1,6 +1,9 @@
 <?php
 
 require_once dirname(__DIR__) . "/vendor/autoload.php";
+
+date_default_timezone_set('Asia/Tokyo');
+
 $config = app\Config::load('twitter');
 
 $twitterWrapper = new \app\TwitterApiWrapper(
@@ -11,9 +14,9 @@ $twitterWrapper = new \app\TwitterApiWrapper(
 );
 
 $result = $twitterWrapper->search("バトフェス OR バトルフェスティバル exclude:retweets");
-var_dump(\app\TwitterApiWrapper::createChatWorkText($result));
+//echo \app\TwitterApiWrapper::createChatWorkText($result);
 
-//$a = \app\ChatWork::post('myChat', \app\TwitterApiWrapper::createChatWorkText($result));
-//var_dump($a);
+$a = \app\ChatWork::post('myChat', \app\TwitterApiWrapper::createChatWorkText($result));
+var_dump($a);
 
 
