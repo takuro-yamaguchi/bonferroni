@@ -14,7 +14,9 @@ class ChatWork
     public static function post($roomName, $contents)
     {
         if (empty($contents)) {
-            return '$contents is empty!';
+            $errorTxt = '$contents is empty!';
+            file_put_contents("chatWork.log", $errorTxt, FILE_APPEND);
+            return $errorTxt;
         }
 
         // 送信パラメーター
