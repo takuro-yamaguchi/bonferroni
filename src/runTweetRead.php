@@ -13,9 +13,12 @@ $twitterWrapper = new \app\TwitterApiWrapper(
     $config['accessTokenSecret']
 );
 
-$result = $twitterWrapper->search("battlefes OR バトフェス OR バトルフェスティバル exclude:retweets");
+$result = $twitterWrapper->search(
+    "battlefes OR バトフェス OR バトルフェスティバル exclude:retweets",
+    date("Y-m-d H:i:s", strtotime("- 5 minite"))
+);
 
-$a = \app\ChatWork::post('myChat', \app\TwitterApiWrapper::createChatWorkText($result));
+$a = \app\ChatWork::post('test', \app\TwitterApiWrapper::createChatWorkText($result));
 print_r($a);
 
 

@@ -27,20 +27,20 @@ class TwitterApiWrapper
      * $queryの条件で、ツイートを取得
      *
      * @param $query
+     * @param $sinceDateTime
      * @return Tweet[]
      */
-    public function search($query)
+    public function search($query, $sinceDateTime = null)
     {
-        $date = date(self::SET_DATE_TIME_TEMPLATE, strtotime("- 5 minute")) . "_JST";
         $params = array(
-            "q" => $query,
+            "q"     => $query,
             'count' => self::DEFAULT_GET_TWEET_COUNT,
-            'since' => $date,
+            'since' => self::convertApiDateTime($sinceDateTime),
         );
 
-        $apiResult = $this->exec("search/tweets", $params);
+        $apiResult = $this->exec("search/tweets", $params, true);
 
-        return self::filterObject($apiResult);
+        return self::getTweetObjectList($apiResult);
     }
 
     /**
@@ -81,7 +81,7 @@ class TwitterApiWrapper
      * @param TwitterListResponse $resultOfObject
      * @return Tweet[]
      */
-    private static function filterObject($resultOfObject)
+    private static function getTweetObjectList($resultOfObject)
     {
         if (empty($resultOfObject)) return array();
 
@@ -116,5 +116,24 @@ class TwitterApiWrapper
         }
 
         return $text;
+    }
+
+    /**
+     * API用のdatetimeに変換する
+     *
+     * @param $datetime Y-m-d H:i:s
+     * @return string Y-m-d_H:i:s_JST
+     */
+    public static function convertApiDateTime($datetime = null)
+    {
+        // datetimeがnullの場合、制限である7日前に設定
+        if (!$datetime) {
+            $timestamp = strtotime("- 7 day");
+        } else {
+            $timestamp = strtotime($datetime);
+        }
+
+        // timezoneを追加
+        return date(self::SET_DATE_TIME_TEMPLATE, $timestamp) . "_JST";
     }
 }

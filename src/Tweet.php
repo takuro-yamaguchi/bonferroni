@@ -20,7 +20,7 @@ class Tweet
     private $setFlag = false;
 
     const TWEET_URL_TEMPLATE      = "https://twitter.com/%s/status/%s";
-    const CHAT_WORK_TEXT_TEMPLATE = "[info][title]!USER_NAME! :@!USER_SCREEN_NAME![/title]!TEXT!\n!ORIGIN_TWEET!!TWEET_TIME![hr]!TWEET_URL![/info]";
+    const CHAT_WORK_TEXT_TEMPLATE = "[info]!USER_NAME! :@!USER_SCREEN_NAME![hr]!TEXT!\n!ORIGIN_TWEET!!TWEET_TIME![hr]!TWEET_URL![/info]";
 
     // tweetのobjectを解析し、値にセット
     public function __construct($tweetObj)
