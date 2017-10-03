@@ -134,7 +134,7 @@ class Tweet
             return '';
         }
 
-        // RTのみのツイートの場合
+        // RTのみのツイートの場合、表示しない
         if ($this->isOnlyRetweet()) {
             return '';
         }

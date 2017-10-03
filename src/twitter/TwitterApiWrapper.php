@@ -38,9 +38,9 @@ class TwitterApiWrapper
             'since' => self::convertApiDateTime($sinceDateTime),
         );
 
-        $apiResult = $this->exec("search/tweets", $params, false);
+        $apiResult = $this->exec("search/tweets", $params, true);
 
-        return self::getTweetObjectList($apiResult);
+        return $apiResult->getTweetList();
     }
 
     /**
@@ -63,33 +63,6 @@ class TwitterApiWrapper
         $apiResult = TwitterListResponse::mergeResult($apiResult, $result);
 
         return $apiResult;
-    }
-
-    /**
-     * tweetObjectから、必要な情報だけ取り出し、Tweetインスタンス配列に変換
-     *
-     * @param TwitterListResponse $resultOfObject
-     * @return Tweet[]
-     */
-    private static function getTweetObjectList($resultOfObject)
-    {
-        if (empty($resultOfObject)) return array();
-
-        // ツイート情報のみ取り出し
-        $objects = $resultOfObject->getStatuses();
-
-        $result = [];
-        foreach ($objects as $obj) {
-            // $objからTweetオブジェクトを生成
-            $result[] = new Tweet($obj);
-        }
-
-        // ツイート日時でソート
-        usort($result, function ($a, $b) {
-            return $a->createdAt > $b->createdAt;
-        });
-
-        return $result;
     }
 
     /**

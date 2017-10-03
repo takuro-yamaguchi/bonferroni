@@ -13,6 +13,9 @@ class TwitterListResponse
     /** @var SearchMetadata  */
     private $searchMetadata;
 
+    /** @var  Tweet[] */
+    private $tweetList;
+
     public function __construct($responseObj)
     {
         $this->statuses       = $responseObj->statuses ?? null;
@@ -27,6 +30,28 @@ class TwitterListResponse
     public function getSearchMetadata()
     {
         return $this->searchMetadata;
+    }
+
+    /**
+     * @return Tweet[]
+     */
+    public function getTweetList()
+    {
+        if (!$this->tweetList) {
+            $tweetList = [];
+            foreach ($this->statuses as $status) {
+                $tweetList[] = new Tweet($status);
+            }
+
+            // ツイート日時でソート
+            usort($tweetList, function ($a, $b) {
+                return $a->createdAt > $b->createdAt;
+            });
+
+            $this->tweetList = $tweetList;
+        }
+
+        return $this->tweetList;
     }
 
     /**
