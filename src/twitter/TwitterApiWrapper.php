@@ -1,6 +1,6 @@
 <?php
 
-namespace app;
+namespace app\twitter;
 
 /**
  * Class TwitterApiWrapper
@@ -38,7 +38,7 @@ class TwitterApiWrapper
             'since' => self::convertApiDateTime($sinceDateTime),
         );
 
-        $apiResult = $this->exec("search/tweets", $params, true);
+        $apiResult = $this->exec("search/tweets", $params, false);
 
         return self::getTweetObjectList($apiResult);
     }

@@ -6,7 +6,7 @@ date_default_timezone_set('Asia/Tokyo');
 
 $config = app\Config::load('twitter');
 
-$twitterWrapper = new \app\TwitterApiWrapper(
+$twitterWrapper = new \app\twitter\TwitterApiWrapper(
     $config['consumerKey'],
     $config['consumerSecret'],
     $config['accessToken'],
@@ -18,7 +18,7 @@ $result = $twitterWrapper->search(
     date("Y-m-d H:i:s", strtotime("- 5 minite"))
 );
 
-$a = \app\ChatWork::post('test', \app\TwitterApiWrapper::createChatWorkText($result));
+$a = \app\ChatWork::post('test', \app\twitter\TwitterApiWrapper::createChatWorkText($result));
 print_r($a);
 
 
