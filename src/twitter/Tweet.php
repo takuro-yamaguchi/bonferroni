@@ -8,12 +8,36 @@ namespace app\twitter;
  */
 class Tweet
 {
-    /** @var  User */
+    /** @var  int ツイートID。新しいものが番号が古く、古いものが番号が若い。 */
+    public $id;
+    /** @var  string $idのstr版(intで扱えない場合はこちらを用いる) */
+    public $idStr;
+    /** @var  User ユーザー情報 */
     public $user;
+    /** @var  string ツイート本文 */
     public $text;
-    public $externalHost;
-    public $tweetUrl;
-    public $createdTime;
+    /** @var  Tweet リツイートか否か(True:リツイート/False:通常ツイート) */
+    public $retweetedStatus;
+    /** @var  int リツイートされた回数 */
+    public $retweetCount;
+    /** @var  int お気に入りされた数 */
+    public $favoriteCount;
+    /** @var  Entities  追加情報 */
+    public $entities;
+    /** @var  string ツイートを行ったアプリ・サイト等の情報 ex "<a href="https://www.showroom-live.com" rel="nofollow">SHOWROOM-LIVE</a>" */
+    public $source;
+    /** @var  string 言語情報 */
+    public $lang;
+    /** @var  string ツイート日時 */
+    public $createdAt;
+    /** @var  string ツイートがリプライだった時のツイート元のユーザー名 */
+    public $inReplyToScreenName;
+    /** @var  int ツイートがリプライだった時のツイート元のツイートID */
+    public $inReplyToStatusId;
+    /** @var  string 上記の文字列版 */
+    public $inReplyToStatusIdStr;
+
+    // 以下、追加プロパティ
     public $originTweetUrl;
     public $onlyRetweet;
 
@@ -26,71 +50,84 @@ class Tweet
     public function __construct($tweetObj)
     {
         // set
-        $this->setUser($tweetObj);
-        $this->setCreatedTime($tweetObj);
-        $this->setUrl($tweetObj);
-        $this->setTweetUrl($tweetObj);
-        $this->setText($tweetObj);
-        $this->setOriginTweetUrl($tweetObj);
+        $this->id                   = $tweetObj->id;
+        $this->idStr                = $tweetObj->id_str;
+        $this->user                 = new User($tweetObj->user);
+        $this->text                 = $tweetObj->text;
+        $this->retweetedStatus      = !empty($tweetObj->retweetedStatus) ? new Tweet($tweetObj->retweetedStatus) : null;
+        $this->retweetCount         = $tweetObj->retweet_count;
+        $this->favoriteCount        = $tweetObj->favorite_count;
+        $this->entities             = !empty($tweetObj->entities) ? new Entities($tweetObj->entities) : null;
+        $this->source               = $tweetObj->source;
+        $this->lang                 = $tweetObj->lang;
+        $this->createdAt            = $tweetObj->created_at;
+        $this->inReplyToScreenName  = $tweetObj->in_reply_to_screen_name;
+        $this->inReplyToStatusId    = $tweetObj->in_reply_to_status_id;
+        $this->inReplyToStatusIdStr = $tweetObj->in_reply_to_status_id_str;
 
-        if ($this->user->screenName == "seina_fuku48") {
-            var_dump($tweetObj);
-        }
         // setFlag On
         $this->setFlag = true;
     }
 
-    private function setUser($obj)
+    /**
+     * RTのみのツイートか
+     * @return bool
+     */
+    private function isOnlyRetweet ()
     {
-        $this->user = new User($obj->user);
+        return strpos($this->text, "RT @") === 0;
     }
 
-    private function setCreatedTime($obj)
+    /**
+     * "Y-m-d H:i:s"のフォーマットでcreated_atを返す
+     * @return string
+     */
+    private function getFormattedCreatedTime ()
     {
-        // datetime変換
-        $this->createdTime = date("Y-m-d H:i:s", strtotime($obj->created_at));
+        return date("Y-m-d H:i:s", strtotime($this->createdAt));
     }
 
-    private function setUrl($obj)
+    /**
+     * ChatWork用のテキストを取得
+     * @return string
+     */
+    private function getTextForPost ()
     {
-        if (empty($obj->entities) || empty($obj->entities->urls)) {
-            return;
-        }
-
-        // 外部リンクがある場合、ホスト名のみセット
-        $url = $obj->entities->urls[0]->expanded_url;
-        $this->externalHost = parse_url($url)['host'];
-    }
-
-    private function setTweetUrl($obj)
-    {
-        $this->tweetUrl = sprintf(self::TWEET_URL_TEMPLATE, $obj->user->screen_name, $obj->id_str);
-    }
-
-    private function setText($obj)
-    {
-        $text = $obj->text;
+        $text = $this->text;
 
         // もしRTのみのツイートであれば、1行目のみ取り出す
-        if (strpos($text, "RT @") === 0) {
+        if ($this->isOnlyRetweet()) {
             $text = substr($text, 0, strpos($text, "\n")) . "...";
-            $this->onlyRetweet = true;
         }
 
-        $this->text = str_replace(array("\r", "\n"), " ", $text); // 改行をスペースに変換
+        return str_replace(array("\r", "\n"), " ", $text); // 改行をスペースに変換
     }
 
-    private function setOriginTweetUrl($obj)
+    /**
+     * ツイートのURLを取得
+     * @return string
+     */
+    private function getTweetUrl()
     {
-        // リツイートの場合、リツイート元のツイートURLを取得
-        $this->originTweetUrl = '';
-        if (!empty($obj->retweeted_status)) {
-            $originTweet = new Tweet($obj->retweeted_status);
-            $this->originTweetUrl = sprintf("Retweet元:%s\n", $originTweet->tweetUrl);
-        }
+        return sprintf(self::TWEET_URL_TEMPLATE, $this->user->screenName, $this->idStr);
     }
 
-    // ChatWork投稿用のテキストを生成
+    /**
+     * リツイート元のツイートURLを取得
+     * @return string
+     */
+    private function getOriginTweetUrl()
+    {
+        if (!empty($this->retweeted_status)) {
+            return sprintf("Retweet元:%s\n", $this->retweetedStatus->getTweetUrl());
+        }
+        return '';
+    }
+
+    /**
+     * ChatWork投稿用のテキストを生成
+     * @return string
+     */
     public function createChatWorkText()
     {
         if (!$this->setFlag) {
@@ -98,17 +135,18 @@ class Tweet
         }
 
         // RTのみのツイートの場合
-        if ($this->onlyRetweet) {
+        if ($this->isOnlyRetweet()) {
             return '';
         }
+
         $text = self::CHAT_WORK_TEXT_TEMPLATE;
 
-        $text = str_replace("!USER_NAME!",        $this->user->name,       $text);
-        $text = str_replace("!USER_SCREEN_NAME!", $this->user->screenName, $text);
-        $text = str_replace("!TEXT!",             $this->text,             $text);
-        $text = str_replace("!ORIGIN_TWEET!",     $this->originTweetUrl,   $text);
-        $text = str_replace("!TWEET_TIME!",       $this->createdTime,      $text);
-        $text = str_replace("!TWEET_URL!",        $this->tweetUrl,         $text);
+        $text = str_replace("!USER_NAME!",        $this->user->name,                $text);
+        $text = str_replace("!USER_SCREEN_NAME!", $this->user->screenName,          $text);
+        $text = str_replace("!TEXT!",             $this->getTextForPost(),          $text);
+        $text = str_replace("!ORIGIN_TWEET!",     $this->getOriginTweetUrl(),       $text);
+        $text = str_replace("!TWEET_TIME!",       $this->getFormattedCreatedTime(), $text);
+        $text = str_replace("!TWEET_URL!",        $this->getTweetUrl(),             $text);
 
         return $text . "\n";
     }
@@ -116,12 +154,106 @@ class Tweet
 
 class User
 {
+    /** @var int ユーザーID */
+    public $id;
+    /** @var string ユーザー名 */
     public $name;
+    /** @var string ユーザー名 */
     public $screenName;
+    /** @var string ユーザーの説明情報 */
+    public $description;
+    /** @var int フォロー数 */
+    public $friendsCount;
+    /** @var int フォロワー数 */
+    public $followersCount;
+    /** @var int ツイート数(リツイート含む) */
+    public $statusesCount;
+    /** @var int お気に入り数 */
+    public $favouritesCount;
+    /** @var string 住んでいるところ */
+    public $location;
+    /** @var string このユーザの登録日 */
+    public $createdAt;
 
     public function __construct($userObj)
     {
-        $this->name = $userObj->name;
-        $this->screenName = $userObj->screen_name;
+        $this->id              = $userObj->id;
+        $this->name            = $userObj->name;
+        $this->screenName      = $userObj->screen_name;
+        $this->description     = $userObj->description;
+        $this->friendsCount    = $userObj->friends_count;
+        $this->followersCount  = $userObj->followers_count;
+        $this->statusesCount   = $userObj->statuses_count;
+        $this->favouritesCount = $userObj->favourites_count;
+        $this->location        = $userObj->location;
+        $this->createdAt       = $userObj->created_at;
+    }
+}
+
+class Entities
+{
+    /** @var string */
+    public $symbols;
+    /** @var \stdClass[] 本文中に@で指定されたユーザー情報 */
+    public $userMentions;
+    /** @var string 本文に記載のあるハッシュタグ */
+    public $hashTags;
+    /** @var Url[] 本文に記載されたURL情報 */
+    public $urls;
+
+    public function __construct($entitiesObj)
+    {
+        $this->symbols      = $entitiesObj->symbols;
+        $this->userMentions = $entitiesObj->user_mentions;
+
+        if (!empty($entitiesObj->hashtags)) {
+            $hashTags = [];
+            foreach ($entitiesObj->hashtags as $hashTagObj) {
+                $hashTags[] = new HashTag($hashTagObj);
+            }
+            $this->hashTags = $hashTags;
+        }
+
+        if (!empty($entitiesObj->urls)) {
+            $urls = [];
+            foreach ($entitiesObj->urls as $urlObj) {
+                $urls[] = new Url($urlObj);
+            }
+            $this->urls = $urls;
+        }
+    }
+}
+
+class HashTag
+{
+    /** @var string ハッシュタグ名*/
+    public $text;
+    /** @var TODO */
+    public $indices;
+
+    public function __construct($obj)
+    {
+        $this->text         = $obj->text;
+        $this->indices     = $obj->indices;
+    }
+}
+
+class Url
+{
+    /** @var string 短縮URL*/
+    public $url;
+    /** @var string 完全なURL*/
+    public $expandedUrl;
+    /** @var string 表示用URL*/
+    public $displayUrl;
+    /** @var TODO */
+    public $indices;
+
+    public function __construct($obj)
+    {
+        $this->url         = $obj->url;
+        $this->expandedUrl = $obj->expanded_url;
+        $this->displayUrl  = $obj->display_url;
+        $this->indices     = $obj->indices;
     }
 }

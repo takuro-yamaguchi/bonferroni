@@ -63,16 +63,6 @@ class TwitterApiWrapper
         $apiResult = TwitterListResponse::mergeResult($apiResult, $result);
 
         return $apiResult;
-
-        //////////// テスト用コード
-        if (!file_exists('store.txt')) {
-
-            file_put_contents('store.txt', serialize($apiResult));
-        }
-        $apiResult = unserialize(file_get_contents('store.txt'));
-
-        return $apiResult;
-        ///////////////////////////
     }
 
     /**
@@ -96,7 +86,7 @@ class TwitterApiWrapper
 
         // ツイート日時でソート
         usort($result, function ($a, $b) {
-            return $a->createdTime > $b->createdTime;
+            return $a->createdAt > $b->createdAt;
         });
 
         return $result;
