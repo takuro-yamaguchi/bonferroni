@@ -8,6 +8,7 @@ namespace app;
  */
 class Tweet
 {
+    /** @var  User */
     public $user;
     public $text;
     public $externalHost;
@@ -32,6 +33,9 @@ class Tweet
         $this->setText($tweetObj);
         $this->setOriginTweetUrl($tweetObj);
 
+        if ($this->user->screenName == "seina_fuku48") {
+            var_dump($tweetObj);
+        }
         // setFlag On
         $this->setFlag = true;
     }

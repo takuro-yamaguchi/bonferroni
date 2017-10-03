@@ -34,7 +34,7 @@ class TwitterApiWrapper
         $params = array(
             "q" => $query,
             'count' => self::DEFAULT_GET_TWEET_COUNT,
-            'since' => '2017-10-03_10:48:15_JST'
+            'since' => date(self::SET_DATE_TIME_TEMPLATE, strtotime("- 5 minute")),
         );
 
         $apiResult = $this->exec("search/tweets", $params);
@@ -46,25 +46,20 @@ class TwitterApiWrapper
      * $queryの条件で、ツイートを取得
      *
      * @param $query
-     * @return \stdClass $apiResult
+     * @return TwitterListResponse $apiResult
      */
-    private function exec($endPoint, $params)
+    private function exec($endPoint, $params, $isRecursionGet = false)
     {
-        $apiResult = $this->_connection->get($endPoint, $params);
+        $apiResult = new TwitterListResponse($this->_connection->get($endPoint, $params));
 
-        if (empty($apiResult->search_metadata->next_results)) {
+        if (!$isRecursionGet || $apiResult->isNextResults()) {
             return $apiResult;
         }
 
-        // next_resultsがある場合は、それを元に再度取得APIを実行
-        $nextQuery = $apiResult->search_metadata->next_results;
-        // queryを解析し、パラメータを作成
-        parse_str(preg_replace('/^\?/', '', $nextQuery), $nextParam);
-
-        $result = $this->exec($endPoint, $nextParam);
+        $result = $this->exec($endPoint, $apiResult->getNextApiParams(), $isRecursionGet);
 
         // 取得結果をマージ
-        $apiResult->statuses = array_merge($apiResult->statuses, $result->statuses);
+        $apiResult = TwitterListResponse::mergeResult($apiResult, $result);
 
         return $apiResult;
 
@@ -80,9 +75,9 @@ class TwitterApiWrapper
     }
 
     /**
-     * tweetObjectから、必要な情報だけ取り出し、配列に変換
+     * tweetObjectから、必要な情報だけ取り出し、Tweetインスタンス配列に変換
      *
-     * @param $resultOfObject
+     * @param TwitterListResponse $resultOfObject
      * @return Tweet[]
      */
     private static function filterObject($resultOfObject)
@@ -90,7 +85,7 @@ class TwitterApiWrapper
         if (empty($resultOfObject)) return array();
 
         // ツイート情報のみ取り出し
-        $objects = $resultOfObject->statuses;
+        $objects = $resultOfObject->getStatuses();
 
         $result = [];
         foreach ($objects as $obj) {
@@ -121,10 +116,4 @@ class TwitterApiWrapper
 
         return $text;
     }
-}
-
-class TwitterApiResultObject
-{
-    public $statuses;
-
 }
