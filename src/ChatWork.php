@@ -14,7 +14,7 @@ class ChatWork
     public static function post($roomName, $contents)
     {
         if (empty($contents)) {
-            $errorTxt = '$contents is empty!';
+            $errorTxt = date("Y-m-d H:i:s") . '  $contents is empty!' . PHP_EOL;
             file_put_contents("chatWork.log", $errorTxt, FILE_APPEND);
             return $errorTxt;
         }

@@ -11,7 +11,7 @@ class TwitterApiWrapper
     private $_connection = null;
 
     const DEFAULT_GET_TWEET_COUNT = 100;
-    const SET_DATE_TIME_TEMPLATE = "Y-m-d_H:i:s_JST";
+    const SET_DATE_TIME_TEMPLATE = "Y-m-d_H:i:s";
 
     public function __construct($consumerKey, $consumerSecret, $accessToken, $accessTokenSecret)
     {
@@ -31,10 +31,11 @@ class TwitterApiWrapper
      */
     public function search($query)
     {
+        $date = date(self::SET_DATE_TIME_TEMPLATE, strtotime("- 5 minute")) . "_JST";
         $params = array(
             "q" => $query,
             'count' => self::DEFAULT_GET_TWEET_COUNT,
-            'since' => date(self::SET_DATE_TIME_TEMPLATE, strtotime("- 5 minute")),
+            'since' => $date,
         );
 
         $apiResult = $this->exec("search/tweets", $params);
