@@ -4,6 +4,7 @@ namespace app;
 // ChatWorkのAPIを叩くクラス
 class ChatWork
 {
+    const LOG_FILE_PATH = __DIR__ . "/chatWork.log";
     /**
      * $roomNameに設定されているチャットに$contentsを投稿する
      *
@@ -14,8 +15,8 @@ class ChatWork
     public static function post($roomName, $contents)
     {
         if (empty($contents)) {
-            $errorTxt = date("Y-m-d H:i:s") . '  $contents is empty!' . PHP_EOL;
-            file_put_contents("chatWork.log", $errorTxt, FILE_APPEND);
+            $errorTxt = date("Y-m-d H:i:s") . " \$contents is empty!\n";
+            file_put_contents(self::LOG_FILE_PATH, $errorTxt, FILE_APPEND);
             return $errorTxt;
         }
 
@@ -57,6 +58,9 @@ class ChatWork
         } else {
             $message = "Success";
         }
+
+        // LOG
+        file_put_contents(self::LOG_FILE_PATH, date("Y-m-d H:i:s") . "  " . $message . "\n", FILE_APPEND);
 
         // APIの結果を返す
         return $message . "\n";
