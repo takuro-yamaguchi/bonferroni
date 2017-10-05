@@ -30,15 +30,15 @@ class TwitterApiWrapper
      * $queryの条件で、ツイートを取得
      *
      * @param $query
-     * @param $sinceDateTime
+     * @param $sinceId
      * @return TwitterListResponse
      */
-    public function searchTweets($query, $sinceDateTime = null)
+    public function searchTweets($query, $sinceId = 0)
     {
         $params = array(
-            "q"     => $query,
-            'count' => self::DEFAULT_GET_TWEET_COUNT,
-            'since' => self::convertApiDateTime($sinceDateTime),
+            "q"        => $query,
+            'count'    => self::DEFAULT_GET_TWEET_COUNT,
+            'since_id' => $sinceId,
         );
 
         $apiResult = $this->exec("search/tweets", $params, true);

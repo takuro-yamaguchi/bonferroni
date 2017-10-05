@@ -80,20 +80,6 @@ class TwitterListResponse
     }
 
     /**
-     * ChatWork投稿用テキスト生成
-     * @return string $text
-     */
-    public function createChatWorkText()
-    {
-        $text = '';
-        foreach ($this->getTweetList() as $tweet) {
-            $text .= $tweet->createChatWorkText();
-        }
-
-        return $text;
-    }
-
-    /**
      * $a,$bのstatusesをマージ
      *
      * @param  TwitterListResponse $a
@@ -142,6 +128,11 @@ class SearchMetadata
         $this->query       = $searchMetadataObj->query        ?? null;
         $this->nextResults = $searchMetadataObj->next_results ?? null;
         $this->refreshUrl  = $searchMetadataObj->refresh_url  ?? null;
+    }
+
+    public function getMaxId()
+    {
+        return $this->maxId;
     }
 
     public function getNextResults()

@@ -13,10 +13,25 @@ $twitterApi = new \app\twitter\TwitterApiWrapper(
     $config['accessTokenSecret']
 );
 
+$maxIdTxtPath = "../log/maxId.txt";
+// maxId取得
+$maxId = file_exists($maxIdTxtPath) ? file_get_contents($maxIdTxtPath) : 0;
+
+// ツイート検索
 $twitterListResponse = $twitterApi->searchTweets(
     "battlefes OR バトフェス OR バトルフェスティバル exclude:retweets",
-    date("Y-m-d H:i:s", strtotime("- 5 minitue"))
+    $maxId
 );
 
-$postResult = \app\ChatWork::post('test', $twitterListResponse->createChatWorkText());
+// maxIdをローカルに保存
+file_put_contents("$maxIdTxtPath", $twitterListResponse->getSearchMetadata()->getMaxId());
+
+// ChatWork用のテキスト作成
+$text = '';
+foreach ($twitterListResponse->getTweetList() as $tweet) {
+    $text .= $tweet->createChatWorkText();
+}
+
+// ChatWork投稿
+$postResult = \app\ChatWork::post('test', $text);
 echo $postResult . PHP_EOL;
