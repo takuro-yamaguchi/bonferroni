@@ -13,8 +13,8 @@ $twitterApi = new \app\twitter\TwitterApiWrapper(
     $config['accessTokenSecret']
 );
 
-$maxIdTxtPath = "../log/maxId.txt";
 // maxId取得
+$maxIdTxtPath = "../log/maxId.txt";
 $maxId = file_exists($maxIdTxtPath) ? file_get_contents($maxIdTxtPath) : 0;
 
 // ツイート検索
@@ -29,6 +29,10 @@ file_put_contents("$maxIdTxtPath", $twitterListResponse->getSearchMetadata()->ge
 // ChatWork用のテキスト作成
 $text = '';
 foreach ($twitterListResponse->getTweetList() as $tweet) {
+    if (\app\NgWordUtil::isIncludeNgWord($tweet->getTextForPost())){
+        continue;
+    }
+    echo $tweet->getTextForPost() . PHP_EOL;
     $text .= $tweet->createChatWorkText();
 }
 

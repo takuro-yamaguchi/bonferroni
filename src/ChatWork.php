@@ -49,7 +49,7 @@ class ChatWork
         curl_setopt_array($ch, $options);
         $res = curl_exec($ch);
         curl_close($ch);
-
+        var_dump($res);
         // エラー判定
         $res = json_decode($res, true);
         if (isset($res["errors"])) {

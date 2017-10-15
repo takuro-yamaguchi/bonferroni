@@ -87,7 +87,7 @@ class Tweet
      * ChatWork用のテキストを取得
      * @return string
      */
-    private function getTextForPost ()
+    public function getTextForPost ()
     {
         $text = $this->text;
 
