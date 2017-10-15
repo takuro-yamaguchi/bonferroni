@@ -6,7 +6,8 @@ date_default_timezone_set('Asia/Tokyo');
 
 $response = \app\ChatWork::getRoomMessage('notice');
 
-$ngWordList = [];
+/** @var  \app\Message[] $addNgWordMessages */
+$addNgWordMessages = [];
 
 foreach ($response->getMessageList() as $message) {
     // bot向けメッセージでない場合はスルー
@@ -20,16 +21,25 @@ foreach ($response->getMessageList() as $message) {
         continue;
     }
 
+    $addNgWordMessages[] = $message;
+}
+
+// NGワード登録
+$postText = '';
+foreach ($addNgWordMessages as $message) {
     // ""で囲まれたワードを、NGワードとして取り出す
     if (!preg_match('/"(.*?)"/', $message->body, $ngWord)) {
         continue;
     }
 
-    $ngWordList[] = trim($ngWord[1]);
+    $ngWord = trim($ngWord[1]);
+
+    if (\app\NgWordUtil::insertNgWord($ngWord)) {
+        $postText .= sprintf("[To:%s]\n\"%s\"をNGワードに登録しました!\n", $message->account->accountId, $ngWord);
+    }
 }
 
-foreach ($ngWordList as $ngWord) {
-    \app\NgWordUtil::insertNgWord($ngWord);
+if (!empty($postText)) {
+    $postResult = \app\ChatWork::post('notice', $postText);
+    echo $postResult . PHP_EOL;
 }
-
-print_r(\app\NgWordUtil::getNgWordList());
