@@ -8,6 +8,7 @@ namespace app;
  */
 class NgWordUtil
 {
+    const DB_PATH = '../log/my_db.db';
     private static $ngWordList = null;
 
     /**
@@ -56,7 +57,7 @@ class NgWordUtil
     public static function getNgWordList()
     {
         if (empty(self::$ngWordList)) {
-            $dbh = self::getConnection('../log/akb_twitter.db');
+            $dbh = self::getConnection(self::DB_PATH);
 
             $res = $dbh->query('SELECT * FROM NgWordData')->fetchAll();
             if (empty($res)) {
@@ -71,28 +72,28 @@ class NgWordUtil
 
     /**
      * NGワード追加
-     * @param string[] $ngWordList
+     * @param string $newNgWord
      * @return bool
      */
-    public static function insertNgWord($ngWordList)
+    public static function insertNgWord($newNgWord)
     {
-        var_dump($ngWordList);
-        if (!is_array($ngWordList)) {
+        if (empty($newNgWord)) {
             return false;
         }
 
-        $dbh = self::getConnection('../log/akb_twitter.db');
+        $dbh = self::getConnection(self::DB_PATH);
+
+        // 既存のNGワードとチェック
+        if (in_array($newNgWord, self::getNgWordList())) {
+            return false;
+        }
 
         $sql = $dbh->prepare("insert into NgWordData (ngWord, createdTime) VALUES (?, ?)");
 
-        foreach ($ngWordList as $word) {
-            $sql->execute([
-                $word,
-                date('Y-m-d H:i:s'),
-            ]);
-        }
-
-        return true;
+        return $sql->execute([
+            $newNgWord,
+            date('Y-m-d H:i:s'),
+        ]);
     }
 
     /**

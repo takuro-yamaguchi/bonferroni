@@ -32,10 +32,9 @@ foreach ($twitterListResponse->getTweetList() as $tweet) {
     if (\app\NgWordUtil::isIncludeNgWord($tweet->getTextForPost())){
         continue;
     }
-    echo $tweet->getTextForPost() . PHP_EOL;
     $text .= $tweet->createChatWorkText();
 }
 
 // ChatWork投稿
-$postResult = \app\ChatWork::post('test', $text);
+$postResult = \app\ChatWork::post('notice', $text);
 echo $postResult . PHP_EOL;
